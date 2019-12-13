@@ -1,0 +1,78 @@
+openapi: 3.0.0
+info:
+  title: 5G-EVE RBAC module
+  description: Authentication and authorization module for 5G-EVE portal
+  version: 0.1.0
+servers:
+  - url: http://api.example.com/v1
+    description: Server description
+paths:
+  /register:
+    post:
+      summary: Provides user registration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/userRegistration'
+      responses:
+        '400':
+          description: Bad request due to missing parameters
+
+  /login:
+    post:
+      summary: Returns access and refresh token
+      description: provides authentication for users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/userLogin'
+      responses:
+        '400':
+          description: Bad request due to missing parameters
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+
+  /logout:
+    get:
+      summary: Provides user registration
+      security:
+        - bearerAuth: []
+      responses:
+        '401':
+          description: token not provided
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    userLogin:
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    userRegistration:
+      properties:
+        email:
+          type: string
+        username:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        password:
+          type: string
