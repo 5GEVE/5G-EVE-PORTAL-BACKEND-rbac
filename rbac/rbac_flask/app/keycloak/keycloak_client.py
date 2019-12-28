@@ -2,6 +2,9 @@ import requests, os, json
 from requests.auth import HTTPBasicAuth
 from flask import ( jsonify )
 
+#TODO:
+ENGINE_ADDRESS = "http://192.168.1.251:8080"
+
 class Keycloak:
 
     def __init__(self):
@@ -41,6 +44,7 @@ class Keycloak:
         }
 
         url = self.client_config['web']['token_introspection_uri']
+        print(url)
         
         response = requests.post(url, data=data)
         if response.status_code != requests.codes.ok:

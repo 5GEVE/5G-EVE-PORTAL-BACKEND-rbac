@@ -1,21 +1,21 @@
 {
     "web": {
         "client_id": "RBAC",
-        "client_secret": "63c30bad-3e05-4337-9d95-4b7666479b4e",
-        "issuer": "http://172.16.0.8:8080/auth/realms/5geve",
+        "client_secret": "094ffa2e-39c4-4170-b1df-ef12396cbe8a",
+        "issuer": "/auth/realms/5geve",
         "redirect_uris": [
-            "http://172.16.0.8:8080/oidc_callback"
+            "/oidc_callback"
         ],
-        "auth_uri": "http://172.16.0.8:8080/auth/realms/5geve/protocol/openid-connect/auth",
-        "userinfo_uri": "http://172.16.0.8:8080/auth/realms/5geve/protocol/openid-connect/userinfo",
-        "token_uri": "http://172.16.0.8:8080/auth/realms/5geve/protocol/openid-connect/token",
-        "token_introspection_uri": "http://172.16.0.8:8080/auth/realms/5geve/protocol/openid-connect/token/introspect",
-        "end_session": "http://172.16.0.8:8080/auth/realms/5geve/protocol/openid-connect/logout",
+        "auth_uri": "http://192.168.1.251:8080/auth/realms/5geve/protocol/openid-connect/auth",
+        "userinfo_uri": "http://192.168.1.251:8080/auth/realms/5geve/protocol/openid-connect/userinfo",
+        "token_uri": "http://192.168.1.251:8080/auth/realms/5geve/protocol/openid-connect/token",
+        "token_introspection_uri": "http://192.168.1.251:8080/auth/realms/5geve/protocol/openid-connect/token/introspect",
+        "end_session": "http://192.168.1.251:8080/auth/realms/5geve/protocol/openid-connect/logout",
         "admin_username": "admin",
         "admin_password": "Pa55w0rd",
-        "admin_token_uri": "http://172.16.0.8:8080/auth/realms/master/protocol/openid-connect/token",
-        "admin_token_introspect_uri": "http://172.16.0.8:8080/auth/realms/master/protocol/openid-connect/token/introspect",
-        "admin_users_uri": "http://172.16.0.8:8080/auth/admin/realms/5geve/users",
-        "admin_groups_uri": "http://172.16.0.8:8080/auth/admin/realms/5geve/groups"
+        "admin_token_uri": "http://192.168.1.251:8080/auth/realms/master/protocol/openid-connect/token",
+        "admin_token_introspect_uri": "http://192.168.1.251:8080/auth/realms/master/protocol/openid-connect/token/introspect",
+        "admin_users_uri": "http://192.168.1.251:8080/auth/admin/realms/5geve/users",
+        "admin_groups_uri": "http://192.168.1.251:8080/auth/admin/realms/5geve/groups"
     }
 }

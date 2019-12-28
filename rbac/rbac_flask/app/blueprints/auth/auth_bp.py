@@ -8,7 +8,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 # BLUEPRINT CREATION
-bp = Blueprint('auth', __name__, url_prefix='/')
+bp = Blueprint('auth', __name__, url_prefix='/portal/catalogue')
 
 # Keycloak adapter
 kc_client = Keycloak()
@@ -25,6 +25,7 @@ def login():
     
     status_code, msg = kc_client.get_auth_token(data['email'], data['password'])
     
+    ''' TODO: Ticketing system integration
     if status_code == requests.codes.ok:
         user_credentials = {'email': data['email'], 'password': data['password']}
         headers = {'Content-Type': 'application/json'}
@@ -34,7 +35,7 @@ def login():
             return msg, status_code
         else:
             return bz_login_response.json(), bz_login_response.status_code
-
+    '''
     return msg, status_code
 
 @bp.route('/refreshtoken', methods=['POST'])
@@ -61,12 +62,13 @@ def registration():
     except KeyError as error:
         return jsonify({"details": "Parameter {} not provided".format(error)}), 400
 
-    # Notify bugzilla service if successfully registered
+    ''' Notify ticketing system if successfully registered
     if status_code in [200, 201]:
         bugzilla_url = "http://172.16.0.8:9090/register"
         bz_data = {'email': data['email'], 'full_name': data['firstName'] + " " + data['lastName'], 'password': data['password']}
         bz_registration_status, bz_registration_msg = requests.post(bugzilla_url, headers=request.headers, data=data)
         #TODO: handle status codes from bugzilla
+    '''
 
     return details, status_code
 
@@ -87,7 +89,7 @@ def logout():
         elif 'active' in msg.keys():
             return jsonify({"details": "Expired token"}), 401
     
-    #TODO: notify bugzilla that the user is correctly logged out
+    #TODO: notify Ticketing system that the user is correctly logged out
     #if status_code == 204:
     #    bugzilla_url = "http://localhost:9090/logout"
     #    header = {'Authorization': 'Bearer {}'.format(token), 'Content-Type': 'application/json'}
@@ -99,7 +101,7 @@ def logout():
 @bp.route('/services', methods=['GET'])
 @oidc.accept_token(require_token=True)
 def services():
-
+    
     token = str(request.headers['authorization']).split(" ")[1]
     status_code, msg = kc_client.token_to_user(token)
     

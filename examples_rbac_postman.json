@@ -1,0 +1,134 @@
+{
+	"info": {
+		"_postman_id": "b7edf36a-e494-4e4b-89b0-4fe1080bfed7",
+		"name": "example rbac",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "http://127.0.0.1:8090/portal/catalogue/login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"email\": \"testuser@mail.com\",\n\"password\": \"testuser123456\"\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8090/portal/catalogue/login",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8090",
+					"path": [
+						"portal",
+						"catalogue",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://127.0.0.1:8090/portal/catalogue/services",
+			"request": {
+				"auth": {
+					"type": "oauth2",
+					"oauth2": [
+						{
+							"key": "accessToken",
+							"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJWR1JNbWlCbUdCcXV3MUpmSjBTMVRuSTBRbDc5aW05VUVRd2RKbHpIRGc4In0.eyJqdGkiOiIyYjE2ZTc2YS00YTU0LTRhYzgtYjRhNy02NjdiMGYzNjczMjkiLCJleHAiOjE1Nzc0OTIxNjMsIm5iZiI6MCwiaWF0IjoxNTc3NDkxODYzLCJpc3MiOiJodHRwOi8vMTkyLjE2OC4xLjI1MTo4MDgwL2F1dGgvcmVhbG1zLzVnZXZlIiwiYXVkIjpbIlJCQUMiLCJhY2NvdW50Il0sInN1YiI6IjYwNWUxZTc3LTgwMTQtNGQwMC1iNmM3LTFmMDkyMTEwY2JkNyIsInR5cCI6IkJlYXJlciIsImF6cCI6IlJCQUMiLCJhdXRoX3RpbWUiOjAsInNlc3Npb25fc3RhdGUiOiI0ZTY4OWRlMi04ZTMwLTQ2ZjctOGE3Mi01ZjQ4OWE4ZjlhMDAiLCJhY3IiOiIxIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6ImVtYWlsIHByb2ZpbGUgYXV0aGVudGljYXRpb24iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicHJlZmVycmVkX3VzZXJuYW1lIjoidGVzdHVzZXIiLCJlbWFpbCI6InRlc3R1c2VyQG1haWwuY29tIn0.U_VS_jiPQAlBnXHkV6sCFO4ThsK7uwkqJ0R2but5dgAdyGe-xd3yKlyKEDSeeSmJdmWU4-CbTPW2vSpWAL-ZLZZDeLJyDAYvSTISpSE24KLZlSpE4_HPxwGWT0ILZwU9lgXR8vwnFj_Vc5lmxZnqQHjHcNMM5u4g6RsJcSQdwsTq-uNl7HBGpXe5KIqwZ07EF6HPBgiiPgIDAq0CmyEesZpogYRxuIOGsKt4hqvjFYUQYqt3_KFlUgL2XJBYxZgApOylO7LBBsf1KOJiMyvm94ga2e2C2ctdLMZNVvSCAnzjV1hcuLIiAzc6MNEcNIYBA7IbxT8UM6EnRNIlQtdZGQ",
+							"type": "string"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8090/portal/catalogue/services",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8090",
+					"path": [
+						"portal",
+						"catalogue",
+						"services"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://127.0.0.1:8090/portal/catalogue/logout",
+			"request": {
+				"auth": {
+					"type": "oauth2",
+					"oauth2": [
+						{
+							"key": "accessToken",
+							"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJWR1JNbWlCbUdCcXV3MUpmSjBTMVRuSTBRbDc5aW05VUVRd2RKbHpIRGc4In0.eyJqdGkiOiIyYjE2ZTc2YS00YTU0LTRhYzgtYjRhNy02NjdiMGYzNjczMjkiLCJleHAiOjE1Nzc0OTIxNjMsIm5iZiI6MCwiaWF0IjoxNTc3NDkxODYzLCJpc3MiOiJodHRwOi8vMTkyLjE2OC4xLjI1MTo4MDgwL2F1dGgvcmVhbG1zLzVnZXZlIiwiYXVkIjpbIlJCQUMiLCJhY2NvdW50Il0sInN1YiI6IjYwNWUxZTc3LTgwMTQtNGQwMC1iNmM3LTFmMDkyMTEwY2JkNyIsInR5cCI6IkJlYXJlciIsImF6cCI6IlJCQUMiLCJhdXRoX3RpbWUiOjAsInNlc3Npb25fc3RhdGUiOiI0ZTY4OWRlMi04ZTMwLTQ2ZjctOGE3Mi01ZjQ4OWE4ZjlhMDAiLCJhY3IiOiIxIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6ImVtYWlsIHByb2ZpbGUgYXV0aGVudGljYXRpb24iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicHJlZmVycmVkX3VzZXJuYW1lIjoidGVzdHVzZXIiLCJlbWFpbCI6InRlc3R1c2VyQG1haWwuY29tIn0.U_VS_jiPQAlBnXHkV6sCFO4ThsK7uwkqJ0R2but5dgAdyGe-xd3yKlyKEDSeeSmJdmWU4-CbTPW2vSpWAL-ZLZZDeLJyDAYvSTISpSE24KLZlSpE4_HPxwGWT0ILZwU9lgXR8vwnFj_Vc5lmxZnqQHjHcNMM5u4g6RsJcSQdwsTq-uNl7HBGpXe5KIqwZ07EF6HPBgiiPgIDAq0CmyEesZpogYRxuIOGsKt4hqvjFYUQYqt3_KFlUgL2XJBYxZgApOylO7LBBsf1KOJiMyvm94ga2e2C2ctdLMZNVvSCAnzjV1hcuLIiAzc6MNEcNIYBA7IbxT8UM6EnRNIlQtdZGQ",
+							"type": "string"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8090/portal/catalogue/logout",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8090",
+					"path": [
+						"portal",
+						"catalogue",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
