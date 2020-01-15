@@ -4,7 +4,7 @@ from flask_jwt_extended import ( jwt_optional, get_jwt_identity )
 
 from app.keycloak.keycloak_client import Keycloak
 
-import requests
+import requests, json
 from requests.auth import HTTPBasicAuth
 
 # BLUEPRINT CREATION
@@ -12,6 +12,10 @@ bp = Blueprint('auth', __name__, url_prefix='/')
 
 # Keycloak adapter
 kc_client = Keycloak()
+
+# Bugzilla URL
+#TODO: Set bugzilla service IP:PORT at the configuration file
+BZ_URL = "http://172.16.0.8:9090"
 
 # ROUTES DEFINITION
 @bp.route('/login', methods=['POST'])
@@ -28,7 +32,8 @@ def login():
     if status_code == requests.codes.ok:
         user_credentials = {'email': data['email'], 'password': data['password']}
         headers = {'Content-Type': 'application/json'}
-        bz_login_response = requests.post("http://172.16.0.8:9090/login", headers=headers, json=user_credentials)
+        bz_url = BZ_URL + "/login"
+        bz_login_response = requests.post(bz_url, headers=headers, json=user_credentials)
 
         if bz_login_response.status_code == requests.codes.ok:
             return msg, status_code
@@ -61,12 +66,13 @@ def registration():
     except KeyError as error:
         return jsonify({"details": "Parameter {} not provided".format(error)}), 400
 
-    # Notify bugzilla service if successfully registered
     if status_code in [200, 201]:
-        bugzilla_url = "http://172.16.0.8:9090/register"
+        bugzilla_url = BZ_URL + "/register"
         bz_data = {'email': data['email'], 'full_name': data['firstName'] + " " + data['lastName'], 'password': data['password']}
-        bz_registration_status, bz_registration_msg = requests.post(bugzilla_url, headers=request.headers, data=data)
-        #TODO: handle status codes from bugzilla
+        bz_registration_reply = requests.post(bugzilla_url, headers=request.headers, data=json.dumps(bz_data))
+        
+        #TODO: if a error occurs, remove user from keycloak
+        return bz_registration_reply.json(), bz_registration_reply.status_code
 
     return details, status_code
 

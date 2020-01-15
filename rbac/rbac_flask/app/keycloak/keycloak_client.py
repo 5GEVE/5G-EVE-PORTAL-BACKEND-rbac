@@ -50,7 +50,6 @@ class Keycloak:
         return response.status_code, json.loads(json.dumps({"id": data['sub'],"email": data['email'], "roles": data['realm_access']['roles']}))
 
     def refresh_admin_token(self):
-        print("new admin token")
         self.admin_access_token, self.admin_refresh_token = self.admin_token()
 
     def get_user_id(self, token):
@@ -176,5 +175,7 @@ class Keycloak:
         }
 
         response = requests.post(self.client_config['web']['admin_users_uri'], headers=headers, json=data)
+        if response.status_code == 201:
+            return response.status_code, jsonify({"details": "created"})
 
         return response.status_code, response.json()
