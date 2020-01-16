@@ -181,7 +181,32 @@ class Keycloak:
         }
         url = KC_URL + self.client_config['web']['admin_users_uri']
         response = requests.post(url, headers=headers, json=data)
-        if response.status_code == 201:
-            return response.status_code, jsonify({"details": "created"})
+
+        if response.status_code in [200, 201]:
+            resp_get_user_id = requests.get(self.client_config['web']['admin_users_uri']+"?email={}".format(email), headers=headers)
+            # TODO: User representation following keycloak admin api
+            user_data = str(resp_get_user_id.json()[0]).split(",")
+            user_id = user_data[len(user_data)-1].split(":")[1].split('\'')[1]
+            user = {"user_id": user_id}
+            return response.status_code, user
+
+        return response.status_code, response.json()
+
+    """ Method to delete a user inside keycloak
+        @params: user id
+        @return:
+            - status_code: status of the HTTP request
+            - msg: response data
+    """
+    def delete_user(self, user_id):
+        # Check if admin token is still valid
+        if self.is_token_valid(self.admin_access_token):
+            headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
+        else:
+            self.refresh_admin_token()
+            headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
+
+        url = KC_URL + self.client_config['web']['admin_users_uri'] + '/' + user_id
+        response = requests.delete(url, headers=headers)
 
         return response.status_code, response.json()

@@ -71,8 +71,11 @@ def registration():
         bz_data = {'email': data['email'], 'full_name': data['firstName'] + " " + data['lastName'], 'password': data['password']}
         bz_registration_reply = requests.post(bugzilla_url, headers=request.headers, data=json.dumps(bz_data))
         
-        #TODO: if a error occurs, remove user from keycloak
-        return bz_registration_reply.json(), bz_registration_reply.status_code
+        if bz_registration_reply.status_code not in [200, 201]:
+            # TODO: to be tested
+            kc_client.delete_user(details['user_id'])
+
+        return jsonify({'details': details}), bz_registration_reply.status_code
 
     return details, status_code
 
