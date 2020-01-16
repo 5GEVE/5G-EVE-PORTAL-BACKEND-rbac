@@ -15,7 +15,7 @@ kc_client = Keycloak()
 
 # Bugzilla URL
 #TODO: Set bugzilla service IP:PORT at the configuration file
-BZ_URL = "http://172.16.0.8:9090"
+BZ_URL = "http://10.50.80.3:9090"
 
 # ROUTES DEFINITION
 @bp.route('/login', methods=['POST'])
