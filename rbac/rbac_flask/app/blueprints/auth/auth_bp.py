@@ -72,8 +72,9 @@ def registration():
         bz_registration_reply = requests.post(bugzilla_url, headers=request.headers, data=json.dumps(bz_data))
         
         if bz_registration_reply.status_code not in [200, 201]:
-            # TODO: to be tested
+            
             kc_client.delete_user(details['user_id'])
+            return bz_registration_reply.json(), bz_registration_reply.status_code
 
         return jsonify({'details': details}), bz_registration_reply.status_code
 

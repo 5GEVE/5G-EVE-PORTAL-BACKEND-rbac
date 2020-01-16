@@ -22,7 +22,7 @@ class Keycloak:
             'username': self.client_config['web']['admin_username'],
             'password': self.client_config['web']['admin_password']
         }
-        url = KC_URL + self.client_config['web']['admin_token_uri']
+        url = self.client_config['web']['admin_token_uri']
         response = requests.post(url, data=data)
 
         if response.status_code != requests.codes.ok:
@@ -44,7 +44,7 @@ class Keycloak:
             'token': token
         }
 
-        url = KC_URL + self.client_config['web']['token_introspection_uri']
+        url = self.client_config['web']['token_introspection_uri']
         
         response = requests.post(url, data=data)
         if response.status_code != requests.codes.ok:
@@ -65,7 +65,7 @@ class Keycloak:
             'password': self.client_config['web']['admin_password'],
             'token': token
         }
-        url = KC_URL + self.client_config['web']['token_introspection_uri']
+        url = self.client_config['web']['token_introspection_uri']
         response = requests.post(url, data=data)
 
         return response.status_code, response.json()
@@ -79,7 +79,7 @@ class Keycloak:
             'password': self.client_config['web']['admin_password'],
             'token': token
         }
-        url = KC_URL + self.client_config['web']['token_introspection_uri']
+        url = self.client_config['web']['token_introspection_uri']
         response = requests.post(url, data=data)
 
         if response.status_code != requests.codes.ok:
@@ -106,7 +106,7 @@ class Keycloak:
             'username': username,
             'password': password
         }
-        url = KC_URL + self.client_config['web']['token_uri']
+        url = self.client_config['web']['token_uri']
         token_response = requests.post(url, data=data)
 
         if token_response.status_code != requests.codes.ok:
@@ -129,7 +129,7 @@ class Keycloak:
             'client_secret': self.client_config['web']['client_secret'],
             'refresh_token': refresh_token,
         }
-        url = KC_URL + self.client_config['web']['token_uri']
+        url = self.client_config['web']['token_uri']
         token_response = requests.post(url, data=data)
 
         if token_response.status_code != requests.codes.ok:
@@ -152,7 +152,7 @@ class Keycloak:
             self.refresh_admin_token()
             headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
 
-        url = KC_URL + self.client_config['web']['admin_users_uri'] + '/' + user_id + '/logout'
+        url = self.client_config['web']['admin_users_uri'] + '/' + user_id + '/logout'
         response = requests.post(url, headers=headers)
 
         if response.status_code == 204:
@@ -179,15 +179,15 @@ class Keycloak:
             "enabled": True,
             "emailVerified": True
         }
-        url = KC_URL + self.client_config['web']['admin_users_uri']
+        url = self.client_config['web']['admin_users_uri']
         response = requests.post(url, headers=headers, json=data)
 
         if response.status_code in [200, 201]:
-            resp_get_user_id = requests.get(self.client_config['web']['admin_users_uri']+"?email={}".format(email), headers=headers)
-            # TODO: User representation following keycloak admin api
-            user_data = str(resp_get_user_id.json()[0]).split(",")
-            user_id = user_data[len(user_data)-1].split(":")[1].split('\'')[1]
-            user = {"user_id": user_id}
+            url = self.client_config['web']['admin_users_uri']+"?email={}".format(email)
+            resp_get_user_id = requests.get(url, headers=headers)
+            users = resp_get_user_id.json()
+            user_data = resp_get_user_id.json()[0]
+            user = {"user_id": user_data['id']}
             return response.status_code, user
 
         return response.status_code, response.json()
@@ -206,7 +206,7 @@ class Keycloak:
             self.refresh_admin_token()
             headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
 
-        url = KC_URL + self.client_config['web']['admin_users_uri'] + '/' + user_id
+        url = self.client_config['web']['admin_users_uri'] + '/' + user_id
         response = requests.delete(url, headers=headers)
-
-        return response.status_code, response.json()
+        
+        return response.status_code, jsonify({"info": "User {} removed".format(user_id)})
