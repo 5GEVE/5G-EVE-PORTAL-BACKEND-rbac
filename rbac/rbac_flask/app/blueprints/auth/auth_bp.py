@@ -8,7 +8,7 @@ import requests, json
 from requests.auth import HTTPBasicAuth
 
 # BLUEPRINT CREATION
-bp = Blueprint('auth', __name__, url_prefix='/')
+bp = Blueprint('auth', __name__, url_prefix='/portal/rbac')
 
 # Keycloak adapter
 kc_client = Keycloak()
