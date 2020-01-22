@@ -57,12 +57,13 @@ def refresh_token():
 
 @bp.route('/register', methods=['POST'])
 def registration():
+
     if not request.is_json:
         return jsonify({"details": "No json provided"}), 400
-
+    
     data = request.get_json()
     try:
-        status_code, details = kc_client.create_user(data['email'], data['username'], data['firstName'], data['lastName'], data['password'])
+        status_code, details = kc_client.create_user(data['email'], data['username'], data['firstName'], data['lastName'], data['password'], data['roles'])
     except KeyError as error:
         return jsonify({"details": "Parameter {} not provided".format(error)}), 400
 

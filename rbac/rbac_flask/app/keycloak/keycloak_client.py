@@ -166,7 +166,7 @@ class Keycloak:
             - status_code: status of the HTTP request
             - msg: response data
     """
-    def create_user(self, email, username, firstName, lastName, password):
+    def create_user(self, email, username, firstName, lastName, password, roles):
         # Check if admin token is still valid
         if self.is_token_valid(self.admin_access_token):
             headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
@@ -185,9 +185,17 @@ class Keycloak:
         if response.status_code in [200, 201]:
             url = self.client_config['web']['admin_users_uri']+"?email={}".format(email)
             resp_get_user_id = requests.get(url, headers=headers)
+
             users = resp_get_user_id.json()
             user_data = resp_get_user_id.json()[0]
             user = {"user_id": user_data['id']}
+
+            # Add role to user at keycloak
+            add_role_status_code, add_role_response = self.add_role_to_user(user_data['id'], json.dumps(roles))
+            
+            if add_role_status_code != 204:
+                return add_role_status_code, add_role_response.json()
+
             return response.status_code, user
 
         return response.status_code, response.json()
@@ -210,3 +218,42 @@ class Keycloak:
         response = requests.delete(url, headers=headers)
         
         return response.status_code, jsonify({"info": "User {} removed".format(user_id)})
+
+    """ Method to add roles to a specific user
+        @params: 
+            - user id
+            - roles to be added ([{"id": "role_id", "name": "role_name", "clientRole": False}])
+        @return:
+            - status_code: status of the HTTP request
+            - msg: response data
+    """
+    def add_role_to_user(self, user_id, roles):
+        # Check if admin token is still valid
+        if self.is_token_valid(self.admin_access_token):
+            headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
+        else:
+            self.refresh_admin_token()
+            headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
+
+        #data = json.dumps([{'id': 'c6e1af1c-834b-4459-ab03-a9c8d20bfc31', 'name': 'Vertical','clientRole': False}])
+
+        url = self.client_config['web']['admin_users_uri'] + "/" + user_id + "/role-mappings/realm"
+        response = requests.post(url, headers=headers, data=roles)
+
+        if response.status_code == 204:
+            return response.status_code, ""
+
+        return response.status_code, response.json()
+
+    def get_realm_roles(self, user_id):
+        # Check if admin token is still valid
+        if self.is_token_valid(self.admin_access_token):
+            headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
+        else:
+            self.refresh_admin_token()
+            headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
+
+        url = self.client_config['web']['admin_users_uri'] + "/" + user_id + "/role-mappings/realm/available"
+        response = requests.get(url, headers=headers)
+
+        return response.status_code, response.json()
