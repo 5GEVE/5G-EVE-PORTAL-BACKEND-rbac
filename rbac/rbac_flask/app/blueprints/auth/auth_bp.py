@@ -15,7 +15,7 @@ kc_client = Keycloak()
 
 # Bugzilla URL
 #TODO: Set bugzilla service IP:PORT at the configuration file
-BZ_URL = "http://10.50.80.3:9090"
+BZ_URL = "http://10.50.80.13:9090"
 
 # ROUTES DEFINITION
 @bp.route('/login', methods=['POST'])
@@ -128,6 +128,12 @@ def services():
         return jsonify({'details': services}), status_code
         
     return msg, status_code
+
+@bp.route('/realmroles', methods=['GET'])
+def get_realm_roles():
+    status_code, msg = kc_client.get_available_roles()
+    
+    return jsonify({"details": msg}), status_code
 
 
 @bp.route('/isvalid', methods=['GET'])

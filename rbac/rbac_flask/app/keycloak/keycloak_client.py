@@ -3,7 +3,7 @@ from requests.auth import HTTPBasicAuth
 from flask import ( jsonify )
 
 #TODO: configuration file
-KC_URL = "http://10.50.80.3:8080"
+KC_URL = "http://10.50.80.13:8080"
 
 class Keycloak:
 
@@ -194,7 +194,7 @@ class Keycloak:
             add_role_status_code, add_role_response = self.add_role_to_user(user_data['id'], json.dumps(roles))
             
             if add_role_status_code != 204:
-                return add_role_status_code, add_role_response.json()
+                return add_role_status_code, jsonify({"details": "Error assigning role to user"})
 
             return response.status_code, user
 
@@ -257,3 +257,19 @@ class Keycloak:
         response = requests.get(url, headers=headers)
 
         return response.status_code, response.json()
+    
+    def get_available_roles(self):
+        # Check if admin token is still valid
+        if self.is_token_valid(self.admin_access_token):
+            headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
+        else:
+            self.refresh_admin_token()
+            headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
+        
+        # Get admin user id
+        url = self.client_config['web']['admin_roles_uri']
+        
+        response = requests.get(url, headers=headers)
+        
+        return response.status_code, response.json()
+
