@@ -3,7 +3,7 @@ from requests.auth import HTTPBasicAuth
 from flask import ( jsonify )
 
 #TODO: configuration file
-KC_URL = "http://10.50.80.13:8080"
+KC_URL = "http://10.20.8.19:8080"
 
 class Keycloak:
 
@@ -266,10 +266,19 @@ class Keycloak:
             self.refresh_admin_token()
             headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
         
-        # Get admin user id
         url = self.client_config['web']['admin_roles_uri']
         
         response = requests.get(url, headers=headers)
         
-        return response.status_code, response.json()
+        if response.status_code == 200:
+            realmroles = response.json()
+            available_roles = []
+            for element in realmroles:
+                if element['name'] not in ['offline_access', 'uma_authorization']:
+                    available_roles.append(element)
+
+            return response.status_code, available_roles
+
+        else:
+            return response.status_code, response.json()
 
