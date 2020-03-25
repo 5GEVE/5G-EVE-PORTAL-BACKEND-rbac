@@ -1,4 +1,4 @@
-import os
+import os, json
 from flask import Flask
 from .config import configure
 
@@ -7,6 +7,11 @@ from flask_oidc import OpenIDConnect
 from flask_cors import CORS
 
 oidc = OpenIDConnect()
+
+with open(os.path.abspath(os.path.dirname(__file__))+'/flask_config.json', 'r') as conf_file:
+    conf = conf_file.read()
+
+config = json.loads(conf)
 
 def create_app(test_config=None):
     # create and configure the app

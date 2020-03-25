@@ -1,0 +1,22 @@
+{
+    "bz_url": "http://10.5.7.11:9090/",
+    "kc_url": "http://10.5.7.11:8080/",
+    "kc_admin_username": "admin",
+    "kc_admin_password": "Pa55w0rd",
+    "kc_client_id": "RBAC",
+    "kc_client_secret": "7a1666cb-89b0-4a11-982d-f701d15602ae",
+    "auth_uri": "auth/realms/5geve/protocol/openid-connect/auth",
+    "userinfo_uri": "auth/realms/5geve/protocol/openid-connect/userinfo",
+    "token_uri": "auth/realms/5geve/protocol/openid-connect/token",
+    "token_introspection_uri": "auth/realms/5geve/protocol/openid-connect/token/introspect",
+    "end_session": "auth/realms/5geve/protocol/openid-connect/logout",
+    "admin_token_uri": "auth/realms/master/protocol/openid-connect/token",
+    "admin_token_introspect_uri": "auth/realms/master/protocol/openid-connect/token/introspect",
+    "admin_users_uri": "auth/admin/realms/5geve/users",
+    "admin_groups_uri": "auth/admin/realms/5geve/groups",
+    "admin_roles_uri": "auth/admin/realms/5geve/roles",
+    "issuer": "auth/realms/5geve",
+    "redirect_uris": [
+        "oidc_callback"
+    ]    
+}

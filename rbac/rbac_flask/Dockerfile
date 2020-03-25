@@ -16,7 +16,7 @@ RUN mkdir rbac_flask
 
 ADD ./app /rbac_flask/app
 ADD ./rbac_app.py /rbac_flask
-ADD ./keycloak.json /rbac_flask/app/keycloak
+#ADD ./keycloak.json /rbac_flask/app/keycloak
 
 WORKDIR /rbac_flask
 

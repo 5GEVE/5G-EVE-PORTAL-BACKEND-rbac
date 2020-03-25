@@ -1,5 +1,5 @@
 from flask import ( Blueprint, jsonify, request )
-from app import oidc
+from app import oidc, config
 from flask_jwt_extended import ( jwt_optional, get_jwt_identity )
 
 from app.keycloak.keycloak_client import Keycloak
@@ -14,8 +14,7 @@ bp = Blueprint('auth', __name__, url_prefix='/portal/rbac')
 kc_client = Keycloak()
 
 # Bugzilla URL
-#TODO: Set bugzilla service IP:PORT at the configuration file
-BZ_URL = "http://10.20.8.19:9090"
+BZ_URL = config['bz_url']
 
 # ROUTES DEFINITION
 @bp.route('/login', methods=['POST'])
@@ -32,7 +31,8 @@ def login():
     if status_code == requests.codes.ok:
         user_credentials = {'email': data['email'], 'password': data['password']}
         headers = {'Content-Type': 'application/json'}
-        bz_url = BZ_URL + "/login"
+        bz_url = "{}{}".format(BZ_URL, "login")
+        
         bz_login_response = requests.post(bz_url, headers=headers, json=user_credentials)
 
         if bz_login_response.status_code == requests.codes.ok:
@@ -68,7 +68,7 @@ def registration():
         return jsonify({"details": "Parameter {} not provided".format(error)}), 400
 
     if status_code in [200, 201]:
-        bugzilla_url = BZ_URL + "/register"
+        bugzilla_url = "{}{}".format(BZ_URL, "register")
         bz_data = {'email': data['email'], 'full_name': data['firstName'] + " " + data['lastName'], 'password': data['password']}
         bz_registration_reply = requests.post(bugzilla_url, headers=request.headers, data=json.dumps(bz_data))
         

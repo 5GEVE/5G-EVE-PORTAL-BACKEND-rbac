@@ -3,7 +3,7 @@ from requests.auth import HTTPBasicAuth
 from flask import ( jsonify )
 
 #TODO: configuration file
-KC_URL = "http://10.20.8.19:8080"
+KC_URL = "http://10.5.7.11:8080"
 
 class Keycloak:
 
@@ -23,6 +23,7 @@ class Keycloak:
             'password': self.client_config['web']['admin_password']
         }
         url = self.client_config['web']['admin_token_uri']
+
         response = requests.post(url, data=data)
 
         if response.status_code != requests.codes.ok:
