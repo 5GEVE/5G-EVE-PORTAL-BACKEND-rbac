@@ -21,11 +21,13 @@ def create_app(test_config=None):
     CORS(app, resources={r"/*": {"origins": "*"}})
     with app.app_context():
         # Imports
-        from .blueprints.auth.auth_bp import bp as auth_bp       
+        from .blueprints.auth.auth_bp import bp as auth_bp
+        from .blueprints.extra.extra_bp import bp as extra_bp     
         
         # OpenIDConnect initialization
         oidc.init_app(app)
 
         app.register_blueprint(auth_bp)
+        app.register_blueprint(extra_bp)
 
         return app

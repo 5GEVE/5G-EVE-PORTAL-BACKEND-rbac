@@ -2,9 +2,6 @@ import requests, os, json
 from requests.auth import HTTPBasicAuth
 from flask import ( jsonify )
 
-#TODO: configuration file
-KC_URL = "http://10.5.7.11:8080"
-
 class Keycloak:
 
     def __init__(self):
@@ -146,7 +143,6 @@ class Keycloak:
             - user_id: user identifier
     """
     def logout(self, user_id):
-        # Check if admin token is still valid
         if self.is_token_valid(self.admin_access_token):
             headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
         else:
@@ -161,6 +157,9 @@ class Keycloak:
             
         return response.status_code, response.json()
 
+    ##################
+    ### CRUD Users ###
+    ##################
     """ Method to create a new user inside keycloak
         @params: user information to create a new user
         @return:
@@ -168,7 +167,6 @@ class Keycloak:
             - msg: response data
     """
     def create_user(self, email, username, firstName, lastName, password, roles):
-        # Check if admin token is still valid
         if self.is_token_valid(self.admin_access_token):
             headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
         else:
@@ -208,7 +206,6 @@ class Keycloak:
             - msg: response data
     """
     def delete_user(self, user_id):
-        # Check if admin token is still valid
         if self.is_token_valid(self.admin_access_token):
             headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
         else:
@@ -220,6 +217,27 @@ class Keycloak:
         
         return response.status_code, jsonify({"info": "User {} removed".format(user_id)})
 
+    """ Method to get user from keycloak
+        @params: user id
+        @return:
+            - status_code: status of the HTTP request
+            - msg: response data
+    """
+    def get_user(self, user_id):
+        if self.is_token_valid(self.admin_access_token):
+            headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
+        else:
+            self.refresh_admin_token()
+            headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
+
+        url = self.client_config['web']['admin_users_uri'] + '/' + user_id
+        response = requests.get(url, headers=headers)
+        
+        return response.status_code, jsonify({"info": "User {} removed".format(user_id)})        
+
+    #############
+    ### Roles ###
+    #############
     """ Method to add roles to a specific user
         @params: 
             - user id
@@ -282,4 +300,3 @@ class Keycloak:
 
         else:
             return response.status_code, response.json()
-
