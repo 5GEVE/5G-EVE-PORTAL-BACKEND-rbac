@@ -4,11 +4,11 @@ from flask_jwt_extended import ( jwt_optional, get_jwt_identity )
 
 from app.keycloak.keycloak_client import Keycloak
 
-import requests, json
+import requests, json, collections
 from requests.auth import HTTPBasicAuth
 
 # BLUEPRINT CREATION
-bp = Blueprint('auth', __name__, url_prefix='/portal/rbac/extra')
+bp = Blueprint('extra', __name__, url_prefix='/portal/rbac/extra')
 
 # Keycloak adapter
 kc_client = Keycloak()
@@ -23,15 +23,60 @@ def get_realm_roles():
     
     return jsonify({"details": msg}), status_code
 
-@bp.route('/use-cases', methods=['GET', 'POST'])
+@bp.route('/use-cases', methods=['GET'])
 @oidc.accept_token(require_token=True)
-def use_cases():
-    if flask.request.method == 'POST':
+def get_use_cases():
 
-    else:
+    token = str(request.headers['authorization']).split(" ")[1]
 
-    status_code, msg = kc_client.get_available_roles()
+    status_code, msg = kc_client.token_to_user(token)
+    if status_code == requests.codes.ok:
+        status_code, msg = kc_client.get_user_attributes(msg['id'], "use_cases")
     
+    return jsonify({"details": msg}), status_code
+
+@bp.route('/use-cases', methods=['POST'])
+@oidc.accept_token(require_token=True)
+def add_use_cases():
+
+    if not request.is_json:
+        return jsonify({"details": "No json provided"}), 400
+    
+    data = request.get_json()
+    if not data['use_cases']:
+        return jsonify({"details": "No use cases provided"}), 400
+    
+    if not type(data['use_cases']) == list:
+        return jsonify({"details": "Use cases must be provided using a list of elements"}), 400
+
+    token = str(request.headers['authorization']).split(" ")[1]
+
+    status_code, msg = kc_client.token_to_user(token)
+    if status_code == requests.codes.ok:
+        status_code, msg = kc_client.add_user_attributes(msg['id'], "use_cases", data['use_cases'])
+
+    return jsonify({"details": msg}), status_code
+
+@bp.route('/use-cases', methods=['DELETE'])
+@oidc.accept_token(require_token=True)
+def delete_use_cases():
+
+    if not request.is_json:
+        return jsonify({"details": "No json provided"}), 400
+
+    data = request.get_json()
+    if not data['use_cases']:
+        return jsonify({"details": "No use cases provided"}), 400
+
+    if not type(data['use_cases']) == list:
+        return jsonify({"details": "Use cases must be provided using a list of elements"}), 400
+
+    token = str(request.headers['authorization']).split(" ")[1]
+
+    status_code, msg = kc_client.token_to_user(token)
+    if status_code == requests.codes.ok:
+        status_code, msg = kc_client.delete_user_attributes(msg['id'], "use_cases", data['use_cases'])
+
     return jsonify({"details": msg}), status_code
 
 @bp.route('/isvalid', methods=['GET'])

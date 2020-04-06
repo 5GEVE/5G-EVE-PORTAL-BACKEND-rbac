@@ -233,7 +233,97 @@ class Keycloak:
         url = self.client_config['web']['admin_users_uri'] + '/' + user_id
         response = requests.get(url, headers=headers)
         
-        return response.status_code, jsonify({"info": "User {} removed".format(user_id)})        
+        return response.status_code, response.json()        
+
+    #######################
+    ### User Attributes ###
+    #######################
+
+    def get_user_attributes(self, user_id, attribute_name):
+        if self.is_token_valid(self.admin_access_token):
+            headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
+        else:
+            self.refresh_admin_token()
+            headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
+
+        url = self.client_config['web']['admin_users_uri'] + '/' + user_id
+        response = requests.get(url, headers=headers)
+
+        if response.status_code == 200:
+            data = response.json()
+            try:
+                attributes = data['attributes'][attribute_name]
+            except Exception as e:
+                attributes = []
+            return response.status_code, attributes
+
+        return response.status_code, response.json()
+
+    def add_user_attributes(self, user_id, attribute_name, data):
+
+        if self.is_token_valid(self.admin_access_token):
+            headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
+        else:
+            self.refresh_admin_token()
+            headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
+
+        status, user_data = self.get_user(user_id)
+        if status == 200:
+
+            url = self.client_config['web']['admin_users_uri'] + '/' + user_id
+
+            try:
+                attributes = user_data['attributes'][attribute_name]
+
+            except Exception as e:
+                user_data['attributes'][attribute_name] = []
+                attributes = []
+          
+            for attribute in data:
+                if str(attribute) not in attributes:
+                    user_data['attributes'][attribute_name].append(str(attribute))
+                    attributes = user_data['attributes'][attribute_name]
+
+            response = requests.put(url, headers=headers, json=user_data)
+            
+            if response.status_code == 204:
+                return response.status_code, ""
+        else:
+            return response.status_code, response.json()
+
+    def delete_user_attributes(self, user_id, attribute_name, values_tb_deleted):
+
+        if self.is_token_valid(self.admin_access_token):
+            headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
+        else:
+            self.refresh_admin_token()
+            headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
+
+        status, user_data = self.get_user(user_id)
+
+        if status == 200:
+            url = self.client_config['web']['admin_users_uri'] + '/' + user_id
+            
+            attributes = user_data['attributes'][attribute_name]
+
+            try:
+                for value in values_tb_deleted:
+                    if value in attributes:
+                        user_data['attributes'][attribute_name].remove(value)
+
+                response = requests.put(url, headers=headers, json=user_data)
+
+                if response.status_code == 204:
+                    return response.status_code, ""
+                else:
+                    return response.status_code, response.json()
+
+            except Exception as e:
+                return 204, ""
+        else:
+            return response.status_code, response.json()
+
+
 
     #############
     ### Roles ###
