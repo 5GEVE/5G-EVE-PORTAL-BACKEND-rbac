@@ -21,8 +21,11 @@ BZ_URL = config['bz_url']
 def login():
     if not request.is_json:
         return jsonify({"details": "No json provided"}), 400
+    try:
+        data = request.get_json()
+    except Exception as e:
+        return jsonify({"details": "Provided JSON cannot be decoded"}), 400
 
-    data = request.get_json()
     if 'email' not in data.keys() or 'password' not in data.keys():
         return jsonify({"details": "Username or password not provided"}), 400
     

@@ -43,8 +43,11 @@ def add_use_cases():
         return jsonify({"details": "No json provided"}), 400
     
     data = request.get_json()
-    if not data['use_cases']:
-        return jsonify({"details": "No use cases provided"}), 400
+    try:
+        if not data['use_cases']:
+            return jsonify({"details": "No use cases provided"}), 400
+    except Exception as e:
+        return jsonify({"details": "use_cases key not found at the provided JSON"}), 400
     
     if not type(data['use_cases']) == list:
         return jsonify({"details": "Use cases must be provided using a list of elements"}), 400
