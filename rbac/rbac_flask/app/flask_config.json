@@ -1,5 +1,9 @@
 {
     "bz_url": "http://10.5.7.11:9090/",
+    "tickets_admin": "bzservice@mail.com",
+    "portal_admin": "ticketing@5g-eve.eu",
+    "tickets_component": "AUTHENTICATION",
+    "tickets_product":"5G-EVE_PORTAL",
     "kc_url": "http://10.5.7.11:8080/",
     "kc_admin_username": "admin",
     "kc_admin_password": "Pa55w0rd",

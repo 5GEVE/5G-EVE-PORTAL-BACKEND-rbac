@@ -190,7 +190,7 @@ class Keycloak:
             user = {"user_id": user_data['id']}
 
             # Add role to user at keycloak
-            add_role_status_code, add_role_response = self.add_role_to_user(user_data['id'], json.dumps(roles))
+            add_role_status_code, add_role_response = self.add_role_to_user(user_data['id'], roles)
             
             if add_role_status_code != 204:
                 return add_role_status_code, jsonify({"details": "Error assigning role to user"})
@@ -331,7 +331,7 @@ class Keycloak:
     """ Method to add roles to a specific user
         @params: 
             - user id
-            - roles to be added ([{"id": "role_id", "name": "role_name", "clientRole": False}])
+            - roles to be added (list of role names)
         @return:
             - status_code: status of the HTTP request
             - msg: response data
@@ -344,10 +344,17 @@ class Keycloak:
             self.refresh_admin_token()
             headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
 
-        #data = json.dumps([{'id': 'c6e1af1c-834b-4459-ab03-a9c8d20bfc31', 'name': 'Vertical','clientRole': False}])
+        reply, data = self.get_realm_roles(user_id)
+
+        # [{"id": "role_id", "name": "role_name", "clientRole": False}, {...}]
+        assigned_roles = []
+        for role in roles:
+            for realm_role in data:
+                if role == realm_role['name']:
+                    assigned_roles.append(realm_role)
 
         url = self.client_config['web']['admin_users_uri'] + "/" + user_id + "/role-mappings/realm"
-        response = requests.post(url, headers=headers, data=roles)
+        response = requests.post(url, headers=headers, data=json.dumps(assigned_roles))
 
         if response.status_code == 204:
             return response.status_code, ""

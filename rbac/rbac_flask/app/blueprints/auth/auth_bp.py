@@ -39,7 +39,13 @@ def login():
         bz_login_response = requests.post(bz_url, headers=headers, json=user_credentials)
 
         if bz_login_response.status_code == requests.codes.ok:
-            return msg, status_code
+            # Check if user account is already enabled
+            status_code_token_to_user, user_data = kc_client.token_to_user(msg['access_token'])
+            
+            if "enabled" not in user_data['roles']:
+                return jsonify({"details": "User account not activated. Please, wait until the administrator validates your account"}), 250
+            else:
+                return msg, status_code
         else:
             return bz_login_response.json(), bz_login_response.status_code
 
@@ -66,6 +72,8 @@ def registration():
     
     data = request.get_json()
     try:
+        # Default: disabled user
+        data['roles'].append("disabled")
         status_code, details = kc_client.create_user(data['email'], data['username'], data['firstName'], data['lastName'], data['password'], data['roles'])
     except KeyError as error:
         return jsonify({"details": "Parameter {} not provided".format(error)}), 400
@@ -79,6 +87,17 @@ def registration():
             
             kc_client.delete_user(details['user_id'])
             return bz_registration_reply.json(), bz_registration_reply.status_code
+
+        # Create a ticket if correctly created user
+        bz_trusted_url = "{}{}".format(BZ_URL, "portal/tsb/tickets/trusted")
+        bz_trusted_data = {
+            'reporter': config['tickets_admin'], 
+            'product': config['tickets_product'], 
+            'component': config['tickets_component'], 
+            'summary': "Registration complete: {}".format(data['email']), 
+            'description': "User {} should be enabled to be able to use the portal".format(data['email']),
+            'assigned_to': config['portal_admin']}
+        bz_ticket_reply = requests.post(bz_trusted_url, headers=request.headers, data=json.dumps(bz_trusted_data))
 
         return jsonify({'details': details}), bz_registration_reply.status_code
 
@@ -107,29 +126,6 @@ def logout():
     #    header = {'Authorization': 'Bearer {}'.format(token), 'Content-Type': 'application/json'}
     #    requests.get(bugzilla_url, headers=headers)        
     
-    return msg, status_code
-
-
-@bp.route('/services', methods=['GET'])
-@oidc.accept_token(require_token=True)
-def services():
-
-    token = str(request.headers['authorization']).split(" ")[1]
-    status_code, msg = kc_client.token_to_user(token)
-    
-    if status_code == requests.codes.ok:
-    
-        if "5geve_admin" in msg['roles']:
-            services = [{'name':'Experiments'}, {'name': 'VNF Storage'}, {'name': 'Services Catalogue'}, {'name': 'Tickets'}]
-        elif "5geve_experimenter" in msg['roles']:
-            services = [{'name':'Experiments'}, {'name': 'Services Catalogue'}, {'name': 'Tickets'}]
-        elif "5geve_vnfdev" in msg['roles']:
-            services = [{'name': 'VNF Storage'}, {'name': 'Tickets'}]
-        else:
-            services = [{}]
-
-        return jsonify({'details': services}), status_code
-        
     return msg, status_code
 
 @bp.route('/realmroles', methods=['GET'])
