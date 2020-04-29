@@ -390,7 +390,7 @@ class Keycloak:
             realmroles = response.json()
             available_roles = []
             for element in realmroles:
-                if element['name'] not in ['offline_access', 'uma_authorization']:
+                if element['name'] not in ['offline_access', 'uma_authorization', 'enabled', 'disabled']:
                     available_roles.append(element)
 
             return response.status_code, available_roles
