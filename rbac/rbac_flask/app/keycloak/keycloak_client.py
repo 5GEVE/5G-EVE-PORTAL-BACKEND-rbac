@@ -275,7 +275,8 @@ class Keycloak:
             try:
                 attributes = user_data['attributes'][attribute_name]
 
-            except Exception as e:
+            except KeyError as e:
+                user_data['attributes'] = {}
                 user_data['attributes'][attribute_name] = []
                 attributes = []
           
@@ -303,8 +304,11 @@ class Keycloak:
 
         if status == 200:
             url = self.client_config['web']['admin_users_uri'] + '/' + user_id
-            
-            attributes = user_data['attributes'][attribute_name]
+
+            try:
+                attributes = user_data['attributes'][attribute_name]
+            except KeyError:
+                attributes = []
 
             try:
                 for value in values_tb_deleted:
