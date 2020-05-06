@@ -128,6 +128,47 @@ def logout():
     
     return msg, status_code
 
+@bp.route('/changepassword', methods=['PUT'])
+@oidc.accept_token(require_token=True)
+def change_password():
+
+    if not request.is_json:
+        return jsonify({"details": "No json provided"}), 400
+
+    data = request.get_json()
+
+    token = str(request.headers['authorization']).split(" ")[1]
+
+    try:
+        new_password = data['new_password']
+    except KeyError as error:
+        return jsonify({"details": "Parameter {} not provided".format(error)}), 400
+
+    status_code ,msg = kc_client.get_user_id(token)
+
+    if status_code == requests.codes.ok:
+        if 'sub' in msg.keys():
+            user_id = msg['sub']
+            
+
+            bugzilla_url = "{}{}".format(BZ_URL, "changepassword")
+            bz_reply = requests.put(bugzilla_url, headers=request.headers, data=json.dumps(data))
+
+            if bz_reply.status_code == requests.codes.ok:
+                status_code, msg = kc_client.change_password(user_id, new_password)
+
+                return jsonify({"details": msg}), status_code
+
+            else:
+                return jsonify({"details": bz_reply.json()}), bz_reply.status_code
+
+        else:
+            print("\t [ERROR] User identifier not found when requested to keycloak")
+            return jsonify({"details": "internal server error"}), 500
+
+    else:
+        return jsonify({"details": msg}), status_code
+
 @bp.route('/realmroles', methods=['GET'])
 def get_realm_roles():
     status_code, msg = kc_client.get_available_roles()

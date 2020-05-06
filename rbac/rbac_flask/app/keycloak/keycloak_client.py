@@ -235,6 +235,28 @@ class Keycloak:
         
         return response.status_code, response.json()        
 
+    """ Method to update the password of a user
+        @params: user id
+    """
+    def change_password(self, user_id, new_password):
+        if self.is_token_valid(self.admin_access_token):
+            headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
+        else:
+            self.refresh_admin_token()
+            headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
+
+        data = {
+            "type": "password",
+            "temporary": False,
+            "value": new_password
+        }
+
+        url = self.client_config['web']['admin_users_uri'] + '/' + user_id + '/reset-password'
+
+        response = requests.put(url, headers=headers, json=data)
+
+        return response.status_code, response.content
+
     #######################
     ### User Attributes ###
     #######################
