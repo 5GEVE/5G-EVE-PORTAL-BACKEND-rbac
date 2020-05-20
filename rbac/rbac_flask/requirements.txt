@@ -5,7 +5,7 @@ Flask==1.1.1
 Flask-Cors==3.0.8
 Flask-JWT-Extended==3.24.1
 flask-oidc==1.4.0
-httplib2==0.14.0
+httplib2==0.18.0
 idna==2.8
 itsdangerous==1.1.0
 Jinja2==2.10.3
