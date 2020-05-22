@@ -1,6 +1,6 @@
 from flask import ( Blueprint, jsonify, request )
 from app import oidc, config
-from flask_jwt_extended import ( jwt_optional, get_jwt_identity )
+#from flask_jwt_extended import ( jwt_optional, get_jwt_identity )
 
 from app.keycloak.keycloak_client import Keycloak
 
@@ -17,11 +17,18 @@ kc_client = Keycloak()
 BZ_URL = config['bz_url']
 
 # ROUTES DEFINITION
+""" 
+    Retrieves available roles
+"""
 @bp.route('/realmroles', methods=['GET'])
 def get_realm_roles():
     status_code, msg = kc_client.get_available_roles()
     
     return jsonify({"details": msg}), status_code
+
+##########################
+## Use cases management ##
+##########################
 
 @bp.route('/use-cases', methods=['GET'])
 @oidc.accept_token(require_token=True)
@@ -82,21 +89,81 @@ def delete_use_cases():
 
     return jsonify({"details": msg}), status_code
 
-@bp.route('/isvalid', methods=['GET'])
+###################
+## Managed sites ##
+###################
+@bp.route('/managed-sites', methods=['GET'])
 @oidc.accept_token(require_token=True)
-def is_valid():
-    return jsonify({'msg': 'Token accepted'}), 200
+def get_managed_sites():
+
+    token = str(request.headers['authorization']).split(" ")[1]
+
+    status_code, msg = kc_client.token_to_user(token)
+    if status_code == requests.codes.ok:
+        if "SiteManager" in msg['roles']:
+            status_code, msg = kc_client.get_user_attributes(msg['id'], "managed_sites")
+        else:
+            msg = {"managed_sites": []}
+            status_code = 200
+    
+    return jsonify({"details": msg}), status_code
+
+@bp.route('/managed-sites', methods=['POST'])
+@oidc.accept_token(require_token=True)
+def add_managed_sites():
+
+    if not request.is_json:
+        return jsonify({"details": "No json provided"}), 400
+    
+    data = request.get_json()
+    try:
+        if not data['managed_sites']:
+            return jsonify({"details": "No use cases provided"}), 400
+    except Exception as e:
+        return jsonify({"details": "managed_sites key not found at the provided JSON"}), 400
+    
+    if not type(data['managed_sites']) == list:
+        return jsonify({"details": "Use cases must be provided using a list of elements"}), 400
+
+    token = str(request.headers['authorization']).split(" ")[1]
+
+    status_code, msg = kc_client.token_to_user(token)
+    if status_code == requests.codes.ok:
+        if "SiteManager" in msg['roles']:
+            status_code, msg = kc_client.add_user_attributes(msg['id'], "managed_sites", data['managed_sites'])
+        else:
+            msg = {"managed_sites": []}
+            status_code = 200        
+
+    return jsonify({"details": msg}), status_code
+
+@bp.route('/managed-sites', methods=['DELETE'])
+@oidc.accept_token(require_token=True)
+def delete_managed_sites():
+
+    if not request.is_json:
+        return jsonify({"details": "No json provided"}), 400
+
+    data = request.get_json()
+    if not 'managed_sites' in data.keys():
+        return jsonify({"details": "No use cases provided"}), 400
+
+    if not type(data['managed_sites']) == list:
+        return jsonify({"details": "Use cases must be provided using a list of elements"}), 400
+
+    token = str(request.headers['authorization']).split(" ")[1]
+
+    status_code, msg = kc_client.token_to_user(token)
+    if status_code == requests.codes.ok:
+        if "SiteManager" in msg['roles']:
+            status_code, msg = kc_client.delete_user_attributes(msg['id'], "managed_sites", data['managed_sites'])
+        else:
+            msg = {"managed_sites": []}
+            status_code = 200         
+
+    return jsonify({"details": msg}), status_code
 
 #### For testing purposes ####
-
-@bp.route('/roles', methods=['GET'])
-@oidc.accept_token(require_token=True)
-def get_roles():
-    token = str(request.headers['authorization']).split(" ")[1]
-    user_id = kc_client.get_user_id(token)
-    status, msg = kc_client.get_user_roles(user_id)
-
-    return msg, status
 
 @bp.route('/services', methods=['GET'])
 @oidc.accept_token(require_token=True)

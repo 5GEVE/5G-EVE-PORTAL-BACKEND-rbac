@@ -104,6 +104,8 @@ class Keycloak:
             'username': username,
             'password': password
         }
+        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+        
         url = self.client_config['web']['token_uri']
         token_response = requests.post(url, data=data)
 
@@ -178,6 +180,7 @@ class Keycloak:
             "enabled": True,
             "emailVerified": True
         }
+        
         url = self.client_config['web']['admin_users_uri']
         response = requests.post(url, headers=headers, json=data)
 
@@ -235,6 +238,19 @@ class Keycloak:
         
         return response.status_code, response.json()        
 
+    def get_user_by_email(self, user_email):
+        if self.is_token_valid(self.admin_access_token):
+            headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
+        else:
+            self.refresh_admin_token()
+            headers = {'Authorization': 'Bearer {}'.format(self.admin_access_token), 'Content-Type': 'application/json'}
+
+        url = self.client_config['web']['admin_users_uri'] + '?email=' + user_email
+        response = requests.get(url, headers=headers)
+        
+        return response.status_code, response.content
+
+
     """ Method to update the password of a user
         @params: user id
     """
@@ -247,7 +263,7 @@ class Keycloak:
 
         data = {
             "type": "password",
-            "temporary": False,
+            "temporary": "false",
             "value": new_password
         }
 

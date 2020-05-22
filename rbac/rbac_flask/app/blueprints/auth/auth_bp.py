@@ -1,10 +1,11 @@
 from flask import ( Blueprint, jsonify, request )
 from app import oidc, config
-from flask_jwt_extended import ( jwt_optional, get_jwt_identity )
+#from flask_jwt_extended import ( jwt_optional, get_jwt_identity )
 
 from app.keycloak.keycloak_client import Keycloak
+from app.mail.mail import MailManager
 
-import requests, json
+import requests, json, os
 from requests.auth import HTTPBasicAuth
 
 # BLUEPRINT CREATION
@@ -12,6 +13,9 @@ bp = Blueprint('auth', __name__, url_prefix='/portal/rbac')
 
 # Keycloak adapter
 kc_client = Keycloak()
+
+# Email manager
+mail_manager = MailManager()
 
 # Bugzilla URL
 BZ_URL = config['bz_url']
@@ -118,56 +122,64 @@ def logout():
             return msg, status_code
 
         elif 'active' in msg.keys():
-            return jsonify({"details": "Expired token"}), 401
-    
-    #TODO: notify bugzilla that the user is correctly logged out
-    #if status_code == 204:
-    #    bugzilla_url = "http://localhost:9090/logout"
-    #    header = {'Authorization': 'Bearer {}'.format(token), 'Content-Type': 'application/json'}
-    #    requests.get(bugzilla_url, headers=headers)        
+            return jsonify({"details": "Expired token"}), 401       
     
     return msg, status_code
 
-@bp.route('/changepassword', methods=['PUT'])
-@oidc.accept_token(require_token=True)
-def change_password():
+'''
+@bp.route('/forgotpassword', methods=['POST'])
+#@oidc.accept_token(require_token=True)
+def forgot_password():
 
     if not request.is_json:
         return jsonify({"details": "No json provided"}), 400
 
     data = request.get_json()
 
-    token = str(request.headers['authorization']).split(" ")[1]
+    #token = str(request.headers['authorization']).split(" ")[1]
+
+    #status_code_token_to_user, user_data = kc_client.token_to_user(msg['access_token'])
+    #print(user_data)
 
     try:
-        new_password = data['new_password']
+        email = data['email']
     except KeyError as error:
         return jsonify({"details": "Parameter {} not provided".format(error)}), 400
 
-    status_code ,msg = kc_client.get_user_id(token)
+    status_code ,msg = kc_client.get_user_by_email(email)
 
     if status_code == requests.codes.ok:
-        if 'sub' in msg.keys():
-            user_id = msg['sub']
-            
+        print(msg)
+        msg = json.loads(msg.decode('utf-8'))
+        
+        if 'id' in msg[0].keys():
+            user_id = msg[0]['id']
+
+            # Generate new password
+            stream = os.popen('openssl rand -hex 8')
+            new_password = str(stream.read()).rstrip()
 
             bugzilla_url = "{}{}".format(BZ_URL, "changepassword")
-            bz_reply = requests.put(bugzilla_url, headers=request.headers, data=json.dumps(data))
+            user_data = {"user_email": email,"new_password": new_password}
+            bz_reply = requests.put(bugzilla_url, headers=request.headers, data=json.dumps(user_data))
 
-            if bz_reply.status_code == requests.codes.ok:
+            if bz_reply.status_code in [200, 201, 204]:
+
                 status_code, msg = kc_client.change_password(user_id, new_password)
 
-                return jsonify({"details": msg}), status_code
+                mail_manager.send_pass_reset_email(email, new_password)
+
+                return jsonify({"details": ""}), status_code
 
             else:
                 return jsonify({"details": bz_reply.json()}), bz_reply.status_code
 
         else:
-            print("\t [ERROR] User identifier not found when requested to keycloak")
-            return jsonify({"details": "internal server error"}), 500
-
+            print("[ERROR][FORGOTPASS] user correctly retrieved from keycloak by no id assotiated")
+            return jsonify({"details": "Internal server error"}), 500
     else:
         return jsonify({"details": msg}), status_code
+'''
 
 @bp.route('/realmroles', methods=['GET'])
 def get_realm_roles():
@@ -175,11 +187,6 @@ def get_realm_roles():
     
     return jsonify({"details": msg}), status_code
 
-
-@bp.route('/isvalid', methods=['GET'])
-@oidc.accept_token(require_token=True)
-def is_valid():
-    return jsonify({'msg': 'Token accepted'}), 200
 
 #### For testing purposes ####
 
@@ -191,3 +198,8 @@ def get_roles():
     status, msg = kc_client.get_user_roles(user_id)
 
     return msg, status
+
+@bp.route('/isvalid', methods=['GET'])
+@oidc.accept_token(require_token=True)
+def is_valid():
+    return jsonify({'msg': 'Token accepted'}), 200
