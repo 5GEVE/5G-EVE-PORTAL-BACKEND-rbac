@@ -259,6 +259,7 @@ definitions:
     - "firstName"
     - "lastName"
     - "password"
+    - "project"
     properties:
       email:
         type: string
