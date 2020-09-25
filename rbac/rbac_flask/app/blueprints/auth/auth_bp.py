@@ -3,7 +3,7 @@ from app import oidc, config
 #from flask_jwt_extended import ( jwt_optional, get_jwt_identity )
 
 from app.keycloak.keycloak_client import Keycloak
-from app.mail.mail import MailManager
+#from app.mail.mail import MailManager
 
 import requests, json, os
 from requests.auth import HTTPBasicAuth
@@ -15,7 +15,7 @@ bp = Blueprint('auth', __name__, url_prefix='/portal/rbac')
 kc_client = Keycloak()
 
 # Email manager
-mail_manager = MailManager()
+#mail_manager = MailManager()
 
 # Bugzilla URL
 BZ_URL = config['bz_url']
