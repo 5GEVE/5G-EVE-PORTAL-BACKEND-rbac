@@ -92,6 +92,14 @@ def registration():
             kc_client.delete_user(details['user_id'])
             return bz_registration_reply.json(), bz_registration_reply.status_code
 
+        # Add associated project to user
+        try:
+            project = []
+            project.append(data['project'])
+            status_code, msg = kc_client.add_user_attributes(details['user_id'], "project", project)
+        except KeyError as error:
+            return jsonify({"details": "Error adding project: {}".format(error)}), 400
+
         # Create a ticket if correctly created user
         bz_trusted_url = "{}{}".format(BZ_URL, "portal/tsb/tickets/trusted")
         bz_trusted_data = {
